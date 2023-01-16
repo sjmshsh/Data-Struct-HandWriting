@@ -1,0 +1,98 @@
+#pragma once
+
+#include <vector>
+
+using namespace std;
+
+namespace bit
+{
+	template<size_t N>
+	class bit_set
+	{
+	public:
+		bit_set()
+		{
+			_bits.resize(N / 8 + 1);
+		}
+
+		// 设置为1
+		void set(size_t x)
+		{
+			// 这个i算的是它在第几个char里面
+			size_t i = x / 8;
+			// 这个j算的是它是第几个位
+			size_t j = x % 8;
+			_bits[i] |= (1 << j);
+		}
+
+		// 清理为0
+		void reset(size_t x)
+		{
+			size_t i = x / 8;
+			size_t j = x % 8; 
+			_bits[i] &= (~(1 << j));
+		}
+
+		// 探测这个位是否是1
+		bool test(size_t x)
+		{
+			size_t i = x / 8;
+			size_t j = x % 8;
+			return _bits[i] & (1 << j);
+		}
+	private:
+		vector<char> _bits;
+		// vector<int> _bits;
+	};
+
+	template<size_t N>
+	class TwoBitSet
+	{
+	public:
+		void Set(size_t x)
+		{
+			if (!_bs1.test(x) && !_bs2.test(x)) // 00 -> 01
+			{
+				_bs2.set(x);
+			}
+			else if (!_bs1.test(x) && _bs2.test(x)) // 01 -> 10
+			{
+				_bs1.set(x);
+				_bs2.reset(x);
+			}
+			// 11 表示以及出现2次或者以上，不用处理			
+		}
+
+		void PrintOnceNum()
+		{
+			for (size_t i = 0; i < N; i++)
+			{
+				if (!_bs1.test(i) && _bs2.test(i)) // 01
+				{
+					cout << i << endl;
+				}
+			}
+		}
+	private:
+		// 然后设置的到bs1，一旦设置到bs1就已经说明完成了两次了
+		bit_set<N> _bs1;
+		// 第一次设置到bs2
+		bit_set<N> _bs2;
+	};
+
+	void test_bit_set()
+	{
+		bit_set<0xffffffff> bs;
+	}
+
+	void TestTwoBitSet()
+	{
+		int a[] = { 99,0,4,50,33,44,2,5,99,0,50,99,50,2 };
+		TwoBitSet<100> bs;
+		for (auto e : a)
+		{
+			bs.Set(e);
+		}
+		bs.PrintOnceNum();
+	}
+}
